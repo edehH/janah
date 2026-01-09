@@ -1,0 +1,122 @@
+* {
+    border: none;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-image: url('https://up6.cc/2026/10/176798536996741.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    height: 100vh;
+    overflow-y: auto; /* للسماح بالسحب كما طلبت سابقاً */
+}
+
+.corner-circle-img {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    z-index: 100;
+}
+.corner-circle-img img { width: 100%; height: 100%; object-fit: cover; }
+
+main { min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px 0; }
+
+#auth { width: 95%; max-width: 400px; }
+
+.panel {
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 25px;
+    padding: 15px 20px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+}
+
+.brand-logo-container { text-align: center; margin-bottom: 10px; }
+.main-brand-logo { width: 50%; height: auto; border-radius: 8px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); }
+
+.welcome-msg { text-align: center; font-weight: bold; margin-bottom: 12px; color: #fff; text-shadow: 1px 1px 4px rgba(0,0,0,0.8); font-size: 18px; }
+
+/* تنسيق أزرار المرسل والمستلم بنفس نمط الفئة 500 */
+.role-selector { margin-bottom: 12px; gap: 8px; }
+.role-selector button {
+    flex: 1; padding: 10px; border-radius: 8px;
+    background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);
+    color: white; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.3s;
+}
+.active-role { background: #000 !important; border-color: #fff !important; }
+
+/* تنسيق خانات الموقع والـ GPS */
+.location-wrapper { position: relative; width: 100%; display: flex; align-items: center; margin-bottom: 8px; }
+.gps-btn-visible {
+    position: absolute; left: 5px; background: #fff; border-radius: 5px; width: 35px; height: 35px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 5;
+}
+.gps-btn-hidden { display: none; }
+
+form input {
+    background-color: #ffffff !important;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    padding: 10px;
+    width: 100%;
+    text-align: right;
+    font-size: 14px;
+    color: #000;
+}
+
+.tier-label {
+    background: rgba(192, 192, 192, 0.9);
+    color: #111;
+    padding: 4px;
+    text-align: center;
+    border-radius: 5px;
+    font-size: 12px;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+form button {
+    background: linear-gradient(45deg, #434343, #000000);
+    color: white;
+    border-radius: 8px;
+    font-weight: bold;
+    height: 45px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.wa-button {
+    background-color: #25D366;
+    color: white !important;
+    padding: 8px;
+    border-radius: 8px;
+    font-weight: bold;
+    text-decoration: none;
+    text-align: center;
+    width: 100%;
+    display: block;
+    font-size: 13px;
+}
+
+.flex { display: flex; }
+.direction-column { flex-direction: column; }
+.justify-content-center { justify-content: center; }
+.align-items-center { align-items: center; }
+.separator span { background: rgba(255,255,255,0.3); height: 1px; flex: 1; }
+.or { padding: 0 10px; color: #fff; font-size: 11px; }
+.success-container { text-align: center; color: white; }

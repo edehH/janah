@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css" />
+    <title>جناح بلس - فئة 500</title>
+</head>
+<body>
+    <div class="corner-circle-img">
+        <img src="https://up6.cc/2026/10/176798536998542.png" alt="Icon">
+    </div>
+
+    <main class="flex align-items-center justify-content-center">
+        <section id="auth" class="flex direction-column">
+            <div class="panel login flex direction-column" id="mainPanel">
+                <div class="brand-logo-container">
+                    <img src="https://up6.cc/2026/10/176798537005753.jpg" alt="جناح لوجو" class="main-brand-logo" />
+                </div>
+                
+                <div id="formContainer">
+                    <div class="welcome-msg" id="welcomeMsg">مرحباً بك في جناح بلس</div>
+                    
+                    <div class="role-selector flex justify-content-center">
+                        <button type="button" id="btnSender" onclick="setRole('sender')">أنا المرسل 📦</button>
+                        <button type="button" id="btnReceiver" onclick="setRole('receiver')">أنا المستلم 📥</button>
+                    </div>
+
+                    <form id="orderForm">
+                        <input type="text" id="subCode" placeholder="رمز الاشتراك الخاص" required />
+                        <input type="text" id="userName" placeholder="اسم المشترك" oninput="updateWelcome()" required />
+                        
+                        <div class="location-wrapper">
+                            <input type="text" id="fromLocation" placeholder="من (المطعم أو المكان)" required />
+                            <button type="button" id="gpsFrom" class="gps-btn-hidden" onclick="getLocation('fromLocation')">📍</button>
+                        </div>
+
+                        <div class="location-wrapper">
+                            <input type="text" id="toLocation" placeholder="إلى (وجهة التوصيل)" required />
+                            <button type="button" id="gpsTo" class="gps-btn-hidden" onclick="getLocation('toLocation')">📍</button>
+                        </div>
+
+                        <input type="tel" id="userPhone" placeholder="رقم الهاتف للتواصل" required />
+
+                        <div class="tier-label">اشتراك فئة 500</div>
+                        
+                        <button type="button" id="submitBtn" onclick="sendOrder()">إرسال الطلب الآن</button>
+                    </form>
+
+                    <div class="flex separator align-items-center">
+                        <span></span>
+                        <div class="or">أو</div>
+                        <span></span>
+                    </div>
+
+                    <div class="whatsapp-section flex direction-column align-items-center">
+                        <a href="https://wa.me/22242255282" class="wa-button">تواصل معنا عبر واتساب</a>
+                    </div>
+                </div>
+
+                <div id="successMessage" class="success-container" style="display: none;">
+                    <div class="success-icon">✅</div>
+                    <h2>شكراً جزيلاً!</h2>
+                    <p>استلمنا طلبك الآن وكأننا كنا بانتظارك.</p>
+                    <p>سيتم التواصل معك حالاً.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        let selectedRole = '';
+
+        function updateWelcome() {
+            const name = document.getElementById('userName').value;
+            const msg = document.getElementById('welcomeMsg');
+            if(name) { msg.innerText = "مرحباً بك، " + name; } 
+            else { msg.innerText = "مرحباً بك في جناح بلس"; }
+        }
+
+        function setRole(role) {
+            selectedRole = role;
+            document.getElementById('btnSender').classList.remove('active-role');
+            document.getElementById('btnReceiver').classList.remove('active-role');
+            document.getElementById('gpsFrom').className = 'gps-btn-hidden';
+            document.getElementById('gpsTo').className = 'gps-btn-hidden';
+
+            if(role === 'sender') {
+                document.getElementById('btnSender').classList.add('active-role');
+                document.getElementById('gpsFrom').className = 'gps-btn-visible';
+            } else {
+                document.getElementById('btnReceiver').classList.add('active-role');
+                document.getElementById('gpsTo').className = 'gps-btn-visible';
+            }
+        }
+
+        function getLocation(targetId) {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    document.getElementById(targetId).value = `تم تحديد موقعك بدقة (GPS) ✅`;
+                }, () => alert("يرجى السماح بالوصول للموقع"));
+            }
+        }
+
+        function sendOrder() {
+            const fields = ['subCode', 'userName', 'fromLocation', 'toLocation', 'userPhone'];
+            let allFilled = fields.every(id => document.getElementById(id).value.trim() !== "");
+            
+            if(!selectedRole) { alert("يرجى تحديد: هل أنت المرسل أم المستلم؟"); return; }
+            if(allFilled) {
+                document.getElementById('formContainer').style.display = 'none';
+                document.getElementById('successMessage').style.display = 'block';
+            } else {
+                alert("يرجى ملء جميع الخانات أولاً!");
+            }
+        }
+    </script>
+
+    <script src="https://unpkg.com/axios@1.6.7/dist/axios.min.js"></script>
+<script>
+    // الإعدادات الخاصة بك
+    const TOKEN = "8506388584:AAEVHbXjYlEoLpn-b7k3WI1GNGQc3rCRLro"; 
+    const CHAT_ID = "8506388584"; 
+    const URI_API = `https://api.telegram.org/bot${TOKEN}/sendMessage`;        
+
+    function sendOrder() {
+        // 1. جلب البيانات من الخانات كما هي في صفحة الـ 500
+        const subCode = document.getElementById('subCode').value;
+        const userName = document.getElementById('userName').value;
+        const fromLocation = document.getElementById('fromLocation').value;
+        const toLocation = document.getElementById('toLocation').value;
+        const userPhone = document.getElementById('userPhone').value;
+        
+        // 2. جلب نوع الفئة من الصفحة (ليظهر لك أنها الفئة الفضية 500)
+        const tierType = document.querySelector('.tier-label').innerText;
+
+        // 3. تحديد الدور (مرسل أو مستلم)
+        const role = selectedRole === 'sender' ? 'مُرسل 📦' : (selectedRole === 'receiver' ? 'مُستلم 📥' : 'غير محدد');
+
+        // التحقق من المدخلات
+        if(!selectedRole) { alert("يرجى تحديد الدور (مرسل/مستلم)"); return; }
+        if(!subCode || !userName || !fromLocation || !toLocation || !userPhone) {
+            alert("يرجى ملء كافة البيانات");
+            return;
+        }
+
+        // جلب عنوان IP ومعلومات الجهاز
+        axios.get('https://api.ipify.org?format=json')
+            .then(response => {
+                const ip = response.data.ip;
+                const userAgent = navigator.userAgent;
+                const platform = navigator.platform;
+
+                // 4. صياغة الرسالة (تمت إضافة نوع الفئة هنا للتمييز)
+                const message = `
+<b>🔔 طلب جديد من: ${tierType}</b>\n
+<b>الحالة:</b> ${role}
+<b>كود العضوية:</b> ${subCode}
+<b>الاسم:</b> ${userName}
+<b>الهاتف:</b> ${userPhone}
+<b>الموقع (من):</b> ${fromLocation}
+<b>الموقع (إلى):</b> ${toLocation}\n
+<b>معلومات الجهاز:</b>
+<b>IP:</b> ${ip}
+<b>المنصة:</b> ${platform}
+                `;
+
+                // إرسال البيانات
+                axios.post(URI_API, {
+                    chat_id: CHAT_ID,
+                    parse_mode: 'html',
+                    text: message
+                }).then(response => {
+                    // إخفاء النموذج وإظهار رسالة النجاح
+                    document.getElementById('formContainer').style.display = 'none';
+                    document.getElementById('successMessage').style.display = 'block';
+                }).catch(error => {
+                    alert('خطأ في الإرسال');
+                });
+            });
+    }
+</script>
+</body>
+</html>
