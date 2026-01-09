@@ -1,0 +1,144 @@
+* {
+    border: none;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-image: url('https://up6.cc/2026/10/176798536996741.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    min-height: 100vh;
+    overflow-y: auto; /* يسمح بالسحب للأعلى والأسفل */
+}
+
+main {
+    min-height: 100vh;
+    display: flex;
+    padding: 30px 0;
+}
+
+#auth { width: 95%; max-width: 420px; align-self: center; }
+
+/* إطار النيون البرونزي الدوار */
+.neon-box {
+    position: relative;
+    border-radius: 20px;
+    background: linear-gradient(45deg, #4b3621, #cd7f32, #d4af37, #ffd700, #cd7f32, #4b3621);
+    background-size: 400% 400%;
+    animation: neonFlow 6s ease infinite;
+    padding: 3px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
+}
+
+@keyframes neonFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.panel {
+    background: rgba(15, 15, 15, 0.93);
+    border-radius: 18px;
+    padding: 25px;
+    width: 100%;
+}
+
+.corner-circle-img {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    border: 2px solid #cd7f32;
+    z-index: 1000;
+}
+.corner-circle-img img { width: 100%; height: 100%; object-fit: cover; }
+
+.main-brand-logo { width: 45%; filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.4)); }
+.brand-logo-container { text-align: center; margin-bottom: 20px; }
+
+.welcome-msg { text-align: center; color: #fff; margin-bottom: 20px; font-weight: bold; font-size: 18px; }
+
+/* الخانات بيضاء وواضحة */
+form input {
+    background-color: #ffffff !important;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    padding: 14px;
+    width: 100%;
+    text-align: right;
+    color: #000;
+    font-size: 15px;
+}
+
+/* شريط باقة النخبة مع مسافة في الأسفل لفك الالتصاق */
+.tier-label.vip-animated-bg {
+    background: linear-gradient(90deg, #4b3621, #b8860b, #daa520, #b8860b, #4b3621);
+    background-size: 200% auto;
+    animation: shimmer 4s linear infinite;
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+    border-radius: 8px;
+    font-weight: bold;
+    border: 1px solid #daa520;
+    margin-bottom: 25px; /* المسافة المطلوبة بين الشريط والزر */
+}
+
+@keyframes shimmer { to { background-position: 200% center; } }
+
+/* زر التأكيد البرونزي */
+.vip-animated-btn {
+    background: linear-gradient(45deg, #8B4513, #cd7f32, #D2691E, #8B4513);
+    background-size: 300% 300%;
+    animation: neonFlow 5s ease infinite;
+    color: white;
+    border-radius: 10px;
+    font-weight: bold;
+    height: 55px;
+    width: 100%;
+    cursor: pointer;
+    font-size: 18px;
+    box-shadow: 0 4px 15px rgba(139, 69, 19, 0.5);
+}
+
+.wa-button {
+    background-color: transparent;
+    border: 2px solid #25D366;
+    color: #25D366 !important;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: bold;
+    text-align: center;
+    width: 100%;
+    display: block;
+    text-decoration: none;
+    margin-top: 10px;
+}
+
+.role-selector { margin-bottom: 15px; gap: 10px; display: flex; }
+.role-selector button {
+    flex: 1; padding: 12px; border-radius: 8px;
+    background: rgba(255,255,255,0.1); color: #ccc; cursor: pointer; border: 1px solid #444;
+}
+
+.active-role { background: #cd7f32 !important; color: #fff !important; border: none !important; }
+
+.location-wrapper { position: relative; width: 100%; margin-bottom: 8px; }
+.gps-btn-visible { position: absolute; left: 5px; top: 5px; background: #eee; border-radius: 5px; width: 38px; height: 38px; cursor: pointer; border: 1px solid #ccc; }
+.gps-btn-hidden { display: none; }
+
+.flex { display: flex; }
+.direction-column { flex-direction: column; }
+.justify-content-center { justify-content: center; }
+.align-items-center { align-items: center; }
+.separator span { background: #444; height: 1px; flex: 1; }
+.or { padding: 0 10px; color: #777; font-size: 12px; }
+.success-container { text-align: center; padding: 20px 0; }
+.success-icon { font-size: 60px; margin-bottom: 10px; }

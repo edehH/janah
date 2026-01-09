@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css" />
+    <title>جناح بلس | VIP Lounge</title>
+</head>
+<body>
+    <div class="corner-circle-img">
+        <img src="https://up6.cc/2026/10/176798536998542.png" alt="VIP Icon">
+    </div>
+
+    <main class="flex justify-content-center">
+        <section id="auth" class="flex direction-column">
+            
+            <div class="neon-box">
+                <div class="panel vip-panel flex direction-column" id="mainPanel">
+                    
+                    <div class="brand-logo-container">
+                        <img src="https://up6.cc/2026/10/176798537005753.jpg" alt="جناح بلس VIP" class="main-brand-logo" />
+                    </div>
+                    
+                    <div id="formContainer">
+                        <div class="welcome-msg" id="welcomeMsg">أهلاً بصاحب الامتياز .. جناح VIP</div>
+                        
+                        <div class="role-selector flex justify-content-center">
+                            <button type="button" id="btnSender" onclick="setRole('sender')">أنا المُرسل 📤</button>
+                            <button type="button" id="btnReceiver" onclick="setRole('receiver')">أنا المُستلم 📥</button>
+                        </div>
+
+                        <form id="orderForm">
+                            <input type="text" id="subCode" placeholder="كود العضوية الخاصة (VIP Code)" required />
+                            <input type="text" id="userName" placeholder="الاسم الكريم" oninput="updateWelcome()" required />
+                            
+                            <div class="location-wrapper">
+                                <input type="text" id="fromLocation" placeholder="موقع الاستلام (من)" required />
+                                <button type="button" id="gpsFrom" class="gps-btn-hidden" onclick="getLocation('fromLocation')">📍</button>
+                            </div>
+                            
+                            <div class="location-wrapper">
+                                <input type="text" id="toLocation" placeholder="وجهة التسليم (إلى)" required />
+                                <button type="button" id="gpsTo" class="gps-btn-hidden" onclick="getLocation('toLocation')">📍</button>
+                            </div>
+
+                            <input type="tel" id="userPhone" placeholder="رقم الهاتف المباشر" required />
+
+                            <div class="tier-label vip-animated-bg">باقة النخبة المخملية (1500)</div>
+                            
+                            <button type="button" id="submitBtn" class="vip-animated-btn" onclick="sendOrder()">تأكيد الخدمة الفورية</button>
+                        </form>
+
+                        <div class="flex separator align-items-center">
+                            <span></span>
+                            <div class="or">رفاهية بلا حدود</div>
+                            <span></span>
+                        </div>
+
+                        <div class="whatsapp-section flex direction-column align-items-center">
+                            <a href="https://wa.me/22242255282" class="wa-button">الكونسيرج الخاص (واتساب)</a>
+                        </div>
+                    </div>
+
+                    <div id="successMessage" class="success-container" style="display: none;">
+                        <div class="success-icon">👑</div>
+                        <h2 style="color: #daa520;">تم استلام الأمر</h2>
+                        <p style="color: white;">سيدي الكريم، فريقنا يتحرك لخدمتكم فوراً.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="height: 60px;"></div>
+        </section>
+    </main>
+
+    <script src="https://unpkg.com/axios@1.6.7/dist/axios.min.js"></script>
+    <script>
+        let selectedRole = '';
+        let googleMapsLink = ''; 
+        // نفس بيانات البوت الخاص بالفئة الذهبية كما طلبت
+        const TOKEN = "8439046174:AAFUDMVcCW_Sej_dB_ZrQ9uul0soTOGMEv4"; 
+        const CHAT_ID = "8515393287"; 
+        const URI_API = `https://api.telegram.org/bot${TOKEN}/sendMessage`;        
+
+        function updateWelcome() {
+            const name = document.getElementById('userName').value;
+            const msg = document.getElementById('welcomeMsg');
+            if(name) { msg.innerText = "طاب يومك، " + name; msg.style.color = "#d4af37"; }
+            else { msg.innerText = "أهلاً بصاحب الامتياز .. جناح VIP"; msg.style.color = "#fff"; }
+        }
+
+        function setRole(role) {
+            selectedRole = role;
+            document.getElementById('btnSender').className = role === 'sender' ? 'active-role' : '';
+            document.getElementById('btnReceiver').className = role === 'receiver' ? 'active-role' : '';
+            document.getElementById('gpsFrom').className = role === 'sender' ? 'gps-btn-visible' : 'gps-btn-hidden';
+            document.getElementById('gpsTo').className = role === 'receiver' ? 'gps-btn-visible' : 'gps-btn-hidden';
+        }
+
+        function getLocation(targetId) {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    const lat = pos.coords.latitude;
+                    const lon = pos.coords.longitude;
+                    // إنشاء رابط الخرائط الحقيقي
+                    googleMapsLink = `https://www.google.com/maps?q=${lat},${lon}`;
+                    document.getElementById(targetId).value = `تم حفظ موقعك الجغرافي بدقة 📍`;
+                }, () => alert("سيدي، يرجى تفعيل الـ GPS لنتمكن من الوصول إليك"));
+            }
+        }
+
+        function sendOrder() {
+            const subCode = document.getElementById('subCode').value;
+            const userName = document.getElementById('userName').value;
+            const fromLoc = document.getElementById('fromLocation').value;
+            const toLoc = document.getElementById('toLocation').value;
+            const userPhone = document.getElementById('userPhone').value;
+            const tierType = document.querySelector('.tier-label').innerText;
+
+            if(!selectedRole) { alert("لطفاً سيدي، هل أنت المُرسل أم المُستلم؟"); return; }
+            if(!subCode || !userName || !fromLoc || !toLoc || !userPhone) {
+                alert("نرجو إكمال كافة البيانات لخدمتكم"); return;
+            }
+
+            // استخدام رابط الخريطة إذا تم استخراجه بناءً على دور العميل
+            let finalFrom = (selectedRole === 'sender' && googleMapsLink) ? googleMapsLink : fromLoc;
+            let finalTo = (selectedRole === 'receiver' && googleMapsLink) ? googleMapsLink : toLoc;
+
+            axios.get('https://api.ipify.org?format=json')
+                .then(response => {
+                    const ip = response.data.ip;
+                    const message = `
+<b>💎 طلب VIP جديد: ${tierType}</b>\n
+<b>الحالة:</b> ${selectedRole === 'sender' ? 'مُرسل 📤' : 'مُستلم 📥'}
+<b>كود العضوية:</b> ${subCode}
+<b>الاسم الكريم:</b> ${userName}
+<b>رقم الهاتف:</b> ${userPhone}
+<b>موقع البداية:</b> ${finalFrom}
+<b>وجهة الوصول:</b> ${finalTo}\n
+<b>عنوان الشبكة (IP):</b> ${ip}
+                    `;
+
+                    axios.post(URI_API, {
+                        chat_id: CHAT_ID,
+                        parse_mode: 'html',
+                        text: message
+                    }).then(() => {
+                        document.getElementById('formContainer').style.display = 'none';
+                        document.getElementById('successMessage').style.display = 'block';
+                        window.scrollTo(0,0);
+                    }).catch(() => alert("عذراً، حدث خطأ فني في الإرسال"));
+                });
+        }
+    </script>
+</body>
+</html>
