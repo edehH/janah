@@ -61,124 +61,88 @@
                 <div id="successMessage" class="success-container" style="display: none;">
                     <div class="success-icon">✅</div>
                     <h2>شكراً جزيلاً!</h2>
-                    <p>استلمنا طلبك الآن وكأننا كنا بانتظارك.</p>
-                    <p>سيتم التواصل معك حالاً.</p>
+                    <p>تم إرسال طلبك بنجاح، وموقعك متاح لنا الآن عبر الخريطة.</p>
                 </div>
             </div>
         </section>
     </main>
 
+    <script src="https://unpkg.com/axios@1.6.7/dist/axios.min.js"></script>
     <script>
         let selectedRole = '';
+        let googleMapsLink = ''; 
+        // البوت الموحد لجميع الفئات
+        const TOKEN = "8439046174:AAFUDMVcCW_Sej_dB_ZrQ9uul0soTOGMEv4"; 
+        const CHAT_ID = "8515393287"; 
+        const URI_API = `https://api.telegram.org/bot${TOKEN}/sendMessage`;        
 
         function updateWelcome() {
             const name = document.getElementById('userName').value;
             const msg = document.getElementById('welcomeMsg');
-            if(name) { msg.innerText = "مرحباً بك، " + name; } 
-            else { msg.innerText = "مرحباً بك في جناح بلس"; }
+            msg.innerText = name ? "مرحباً بك، " + name : "مرحباً بك في جناح بلس";
         }
 
         function setRole(role) {
             selectedRole = role;
-            document.getElementById('btnSender').classList.remove('active-role');
-            document.getElementById('btnReceiver').classList.remove('active-role');
-            document.getElementById('gpsFrom').className = 'gps-btn-hidden';
-            document.getElementById('gpsTo').className = 'gps-btn-hidden';
-
-            if(role === 'sender') {
-                document.getElementById('btnSender').classList.add('active-role');
-                document.getElementById('gpsFrom').className = 'gps-btn-visible';
-            } else {
-                document.getElementById('btnReceiver').classList.add('active-role');
-                document.getElementById('gpsTo').className = 'gps-btn-visible';
-            }
+            document.getElementById('btnSender').className = role === 'sender' ? 'active-role' : '';
+            document.getElementById('btnReceiver').className = role === 'receiver' ? 'active-role' : '';
+            document.getElementById('gpsFrom').className = role === 'sender' ? 'gps-btn-visible' : 'gps-btn-hidden';
+            document.getElementById('gpsTo').className = role === 'receiver' ? 'gps-btn-visible' : 'gps-btn-hidden';
         }
 
         function getLocation(targetId) {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition((pos) => {
-                    document.getElementById(targetId).value = `تم تحديد موقعك بدقة (GPS) ✅`;
-                }, () => alert("يرجى السماح بالوصول للموقع"));
+                    const lat = pos.coords.latitude;
+                    const lon = pos.coords.longitude;
+                    // إنشاء رابط الخرائط الحقيقي الذي يفتح موقع العميل مباشرة
+                    googleMapsLink = `https://www.google.com/maps?q=${lat},${lon}`;
+                    document.getElementById(targetId).value = `تم استخراج الموقع الجغرافي بنجاح 📍`;
+                }, () => alert("يرجى تفعيل الـ GPS في جهازك لمشاركة موقعك"));
             }
         }
 
         function sendOrder() {
-            const fields = ['subCode', 'userName', 'fromLocation', 'toLocation', 'userPhone'];
-            let allFilled = fields.every(id => document.getElementById(id).value.trim() !== "");
-            
-            if(!selectedRole) { alert("يرجى تحديد: هل أنت المرسل أم المستلم؟"); return; }
-            if(allFilled) {
-                document.getElementById('formContainer').style.display = 'none';
-                document.getElementById('successMessage').style.display = 'block';
-            } else {
-                alert("يرجى ملء جميع الخانات أولاً!");
+            const subCode = document.getElementById('subCode').value;
+            const userName = document.getElementById('userName').value;
+            const fromLoc = document.getElementById('fromLocation').value;
+            const toLoc = document.getElementById('toLocation').value;
+            const userPhone = document.getElementById('userPhone').value;
+            const tierType = document.querySelector('.tier-label').innerText;
+
+            if(!selectedRole) { alert("لطفاً، حدد هل أنت المرسل أم المستلم؟"); return; }
+            if(!subCode || !userName || !fromLoc || !toLoc || !userPhone) {
+                alert("نرجو ملء جميع البيانات أولاً"); return;
             }
-        }
-    </script>
 
-    <script src="https://unpkg.com/axios@1.6.7/dist/axios.min.js"></script>
-<script>
-    // الإعدادات الخاصة بك
-    const TOKEN = "8506388584:AAEVHbXjYlEoLpn-b7k3WI1GNGQc3rCRLro"; 
-    const CHAT_ID = "8506388584"; 
-    const URI_API = `https://api.telegram.org/bot${TOKEN}/sendMessage`;        
+            // استبدال النص بالرابط الفعلي في الرسالة المرسلة
+            let finalFrom = (selectedRole === 'sender' && googleMapsLink) ? googleMapsLink : fromLoc;
+            let finalTo = (selectedRole === 'receiver' && googleMapsLink) ? googleMapsLink : toLoc;
 
-    function sendOrder() {
-        // 1. جلب البيانات من الخانات كما هي في صفحة الـ 500
-        const subCode = document.getElementById('subCode').value;
-        const userName = document.getElementById('userName').value;
-        const fromLocation = document.getElementById('fromLocation').value;
-        const toLocation = document.getElementById('toLocation').value;
-        const userPhone = document.getElementById('userPhone').value;
-        
-        // 2. جلب نوع الفئة من الصفحة (ليظهر لك أنها الفئة الفضية 500)
-        const tierType = document.querySelector('.tier-label').innerText;
-
-        // 3. تحديد الدور (مرسل أو مستلم)
-        const role = selectedRole === 'sender' ? 'مُرسل 📦' : (selectedRole === 'receiver' ? 'مُستلم 📥' : 'غير محدد');
-
-        // التحقق من المدخلات
-        if(!selectedRole) { alert("يرجى تحديد الدور (مرسل/مستلم)"); return; }
-        if(!subCode || !userName || !fromLocation || !toLocation || !userPhone) {
-            alert("يرجى ملء كافة البيانات");
-            return;
-        }
-
-        // جلب عنوان IP ومعلومات الجهاز
-        axios.get('https://api.ipify.org?format=json')
-            .then(response => {
-                const ip = response.data.ip;
-                const userAgent = navigator.userAgent;
-                const platform = navigator.platform;
-
-                // 4. صياغة الرسالة (تمت إضافة نوع الفئة هنا للتمييز)
-                const message = `
-<b>🔔 طلب جديد من: ${tierType}</b>\n
-<b>الحالة:</b> ${role}
+            axios.get('https://api.ipify.org?format=json')
+                .then(response => {
+                    const ip = response.data.ip;
+                    const message = `
+<b>📦 طلب جديد: ${tierType}</b>\n
+<b>الحالة:</b> ${selectedRole === 'sender' ? 'مُرسل 📤' : 'مُستلم 📥'}
 <b>كود العضوية:</b> ${subCode}
 <b>الاسم:</b> ${userName}
-<b>الهاتف:</b> ${userPhone}
-<b>الموقع (من):</b> ${fromLocation}
-<b>الموقع (إلى):</b> ${toLocation}\n
-<b>معلومات الجهاز:</b>
-<b>IP:</b> ${ip}
-<b>المنصة:</b> ${platform}
-                `;
+<b>رقم الهاتف:</b> ${userPhone}
+<b>من:</b> ${finalFrom}
+<b>إلى:</b> ${finalTo}\n
+<b>عنوان IP:</b> ${ip}
+                    `;
 
-                // إرسال البيانات
-                axios.post(URI_API, {
-                    chat_id: CHAT_ID,
-                    parse_mode: 'html',
-                    text: message
-                }).then(response => {
-                    // إخفاء النموذج وإظهار رسالة النجاح
-                    document.getElementById('formContainer').style.display = 'none';
-                    document.getElementById('successMessage').style.display = 'block';
-                }).catch(error => {
-                    alert('خطأ في الإرسال');
+                    axios.post(URI_API, {
+                        chat_id: CHAT_ID,
+                        parse_mode: 'html',
+                        text: message
+                    }).then(() => {
+                        document.getElementById('formContainer').style.display = 'none';
+                        document.getElementById('successMessage').style.display = 'block';
+                    }).catch(() => alert("خطأ في الإرسال: تأكد من تشغيل البوت"));
                 });
-            });
-    }
-</script>
+        }
+    </script>
 </body>
 </html>
