@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>توصيلة Pro - نظام المحاسبة الرسمي</title>
+    <style>
+        :root {
+            --neon-blue: #00f2ff;
+            --neon-green: #39ff14;
+            --neon-red: #ff3131;
+            --dark-bg: #0a0a0c;
+            --card-gray: #16161a;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            margin: 0; padding: 0;
+        }
+
+        .top-bar {
+            position: sticky; top: 0;
+            background: rgba(10, 10, 12, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 10px 15px; z-index: 100;
+            border-bottom: 1px solid #333;
+        }
+
+        .search-box {
+            width: 100%; background: #1e1e22; border: 1px solid #444;
+            color: #fff; padding: 12px; border-radius: 25px;
+            box-sizing: border-box; outline: none; font-size: 16px;
+        }
+
+        .container { padding: 15px; padding-bottom: 100px; }
+
+        .brand { text-align: center; margin: 10px 0 20px 0; }
+        .brand h1 { color: var(--neon-blue); margin: 0; font-size: 1.8rem; text-shadow: 0 0 10px var(--neon-blue); }
+
+        .add-card { background: var(--card-gray); border-radius: 15px; padding: 15px; margin-bottom: 25px; border: 1px solid #333; }
+        .input-row { display: flex; flex-direction: column; gap: 10px; }
+        
+        input[type="text"], input[type="tel"] { background: #000; border: 1px solid #333; color: #fff; padding: 14px; border-radius: 10px; font-size: 16px; }
+
+        .btn-main { background: var(--neon-blue); color: #000; border: none; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+
+        .rider-card { background: var(--card-gray); margin-bottom: 15px; padding: 15px; border-radius: 12px; display: flex; flex-direction: column; gap: 12px; border-right: 4px solid var(--neon-blue); transition: 0.3s; }
+        .critical { border-right-color: var(--neon-red); box-shadow: 0 0 15px rgba(255, 49, 49, 0.3); }
+
+        .rider-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .rider-info h3 { margin: 0; font-size: 1.2rem; }
+        .rider-info p { margin: 4px 0 0 0; color: #888; font-size: 0.9rem; }
+        .price-tag { color: var(--neon-red); font-weight: bold; font-size: 1.3rem; }
+
+        .rider-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        .btn-sm { padding: 10px 5px; border-radius: 8px; font-size: 0.8rem; border: none; font-weight: bold; cursor: pointer; }
+
+        /* تصميم الفاتورة الرسمية */
+        #invoice-modal { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: #f4f4f4; z-index: 2000; color: #000; padding: 15px; box-sizing: border-box; overflow-y: auto; 
+        }
+
+        .invoice-paper {
+            background: #fff; padding: 25px; border: 1px solid #ddd; box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 500px; margin: 0 auto; min-height: 80vh; position: relative;
+        }
+
+        .invoice-header { border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .invoice-header h2 { margin: 0; text-transform: uppercase; }
+
+        .invoice-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .invoice-table th { background: #333; color: #fff; padding: 10px; text-align: right; }
+        .invoice-table td { padding: 10px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+        .invoice-total { text-align: left; font-size: 1.4rem; font-weight: bold; border-top: 2px solid #333; padding-top: 10px; }
+
+        .barcode-footer { text-align: center; margin-top: 40px; border-top: 1px dashed #ccc; padding-top: 20px; }
+
+        @media print { .no-print { display: none; } #invoice-modal { padding: 0; } .invoice-paper { border: none; box-shadow: none; } }
+    </style>
+</head>
+<body>
+
+<div class="top-bar">
+    <input type="text" id="searchBar" class="search-box" onkeyup="render()" placeholder="ابحث عن دراج...">
+</div>
+
+<div class="container">
+    <div class="brand">
+        <h1>توصيلة</h1>
+        <p>نظام المحاسبة الرسمي للمناديب</p>
+    </div>
+
+    <div class="add-card">
+        <div class="input-row">
+            <input type="text" id="nameInput" placeholder="اسم الدراج الجديد">
+            <input type="tel" id="phoneInput" placeholder="رقم هاتفه">
+            <button class="btn-main" onclick="addRider()">تسجيل في القائمة</button>
+        </div>
+    </div>
+
+    <div id="ridersList"></div>
+
+    <div style="text-align: center; margin-top: 20px;">
+        <button onclick="exportData()" style="background:none; border:1px solid #333; color:#555; padding:8px 15px; border-radius:5px; font-size:12px;">حفظ نسخة احتياطية للبيانات</button>
+    </div>
+</div>
+
+<div id="invoice-modal">
+    <div class="invoice-paper">
+        <div class="invoice-header">
+            <div>
+                <h2>توصيلة</h2>
+                <small>رقم الفاتورة: #<span id="invNum"></span></small>
+            </div>
+            <div style="text-align: left;">
+                <p style="margin:0; font-size:0.8rem;" id="invDate"></p>
+            </div>
+        </div>
+
+        <div id="invoiceClient"></div>
+        
+        <table class="invoice-table">
+            <thead>
+                <tr>
+                    <th>البيان (الرحلة)</th>
+                    <th style="text-align:center;">النسبة (15%)</th>
+                </tr>
+            </thead>
+            <tbody id="invoiceItems"></tbody>
+        </table>
+
+        <div class="invoice-total">
+            المجموع: <span id="invTotal"></span>
+        </div>
+
+        <div class="barcode-footer">
+            <p style="font-size: 0.9rem; margin-bottom: 10px;"><b>امسح لي الدفع امسحه الان للدفع</b></p>
+            
+            <img src="https://up6.cc/2026/01/17685827716621.jpeg" id="qrCodeImg" style="width:150px;">
+            </div>y
+
+        <div class="no-print" style="margin-top:40px; display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <button onclick="shareWhatsApp()" style="padding:15px; background:#25D366; color:#fff; border-radius:8px; border:none; font-weight:bold; cursor:pointer;">إرسال واتساب</button>
+            <button onclick="window.print()" style="padding:15px; background:#000; color:#fff; border-radius:8px; font-weight:bold; cursor:pointer;">طباعة الورقة</button>
+            <button onclick="closeInvoice()" style="grid-column: span 2; padding:12px; background:#eee; border:1px solid #ccc; border-radius:8px; cursor:pointer;">رجوع للقائمة</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let riders = JSON.parse(localStorage.getItem('tawsila_final')) || [];
+    let currentRiderId = null;
+
+    function addRider() {
+        const name = document.getElementById('nameInput').value.trim();
+        const phone = document.getElementById('phoneInput').value.trim();
+        if(!name) return;
+        riders.unshift({ id: Date.now(), name, phone, courses: [], totalDebt: 0 });
+        saveAndRender();
+        document.getElementById('nameInput').value = '';
+        document.getElementById('phoneInput').value = '';
+    }
+
+    function addCourse(id) {
+        const from = prompt("نقطة الاستلام؟");
+        const to = prompt("الوجهة؟");
+        const price = parseFloat(prompt("المبلغ الكلي للكورس؟"));
+        if(from && to && !isNaN(price)) {
+            const r = riders.find(x => x.id === id);
+            const fee = price * 0.15;
+            r.courses.push({ from, to, price, fee, date: new Date().toLocaleDateString('ar-EG') });
+            r.totalDebt += fee;
+            saveAndRender();
+        }
+    }
+
+    function showInvoice(id) {
+        currentRiderId = id;
+        const r = riders.find(x => x.id === id);
+        
+        document.getElementById('invNum').innerText = Math.floor(Math.random()*9000)+1000;
+        document.getElementById('invDate').innerText = new Date().toLocaleDateString('ar-EG');
+        document.getElementById('invoiceClient').innerHTML = `<b>إلى السيد:</b> ${r.name}<br><b>رقم الهاتف:</b> ${r.phone}`;
+        
+        const itemsHtml = r.courses.map(c => `
+            <tr>
+                <td>${c.from} ➔ ${c.to} (${c.date})</td>
+                <td style="text-align:center;">${c.fee.toFixed(2)}</td>
+            </tr>
+        `).join('');
+        
+        document.getElementById('invoiceItems').innerHTML = itemsHtml;
+        document.getElementById('invTotal').innerText = r.totalDebt.toFixed(2);
+        document.getElementById('invoice-modal').style.display = 'block';
+    }
+
+    function shareWhatsApp() {
+        const r = riders.find(x => x.id === currentRiderId);
+        let text = `*فاتورة شركة توصيلة*\n`;
+        text += `--------------------------\n`;
+        text += `الدراج: ${r.name}\n`;
+        text += `المجموع المطلوب: ${r.totalDebt.toFixed(2)}\n`;
+        text += `عدد الرحلات: ${r.courses.length}\n`;
+        text += `--------------------------\n`;
+        text += `يرجى الدفع عبر الباركود المرفق في المكتب.`;
+        const url = `https://wa.me/${r.phone}?text=${encodeURIComponent(text)}`;
+        window.open(url, '_blank');
+    }
+
+    function settleAccount(id) {
+        if(confirm("تأكيد استلام المبلغ بالكامل وحذف الدراج؟")) {
+            riders = riders.filter(x => x.id !== id);
+            saveAndRender();
+        }
+    }
+
+    function exportData() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(riders));
+        const a = document.createElement('a');
+        a.href = dataStr;
+        a.download = "tawsila_backup_" + new Date().toLocaleDateString() + ".json";
+        a.click();
+    }
+
+    function closeInvoice() { document.getElementById('invoice-modal').style.display = 'none'; }
+    function saveAndRender() { localStorage.setItem('tawsila_final', JSON.stringify(riders)); render(); }
+
+    function render() {
+        const list = document.getElementById('ridersList');
+        const term = document.getElementById('searchBar').value.toLowerCase();
+        list.innerHTML = '';
+        riders.filter(r => r.name.toLowerCase().includes(term)).forEach(r => {
+            const isCritical = r.totalDebt > 500 ? 'critical' : '';
+            list.innerHTML += `
+                <div class="rider-card ${isCritical}">
+                    <div class="rider-header">
+                        <div class="rider-info"><h3>${r.name}</h3><p>📱 ${r.phone}</p></div>
+                        <div class="price-tag">${r.totalDebt.toFixed(2)}</div>
+                    </div>
+                    <div class="rider-actions">
+                        <button onclick="addCourse(${r.id})" style="background:#444; color:#fff;" class="btn-sm">+ كورس</button>
+                        <button onclick="showInvoice(${r.id})" style="background:#ffa500;" class="btn-sm">🧾 فاتورة</button>
+                        <button onclick="settleAccount(${r.id})" style="background:var(--neon-green);" class="btn-sm">✅ دفع</button>
+                    </div>
+                </div>`;
+        });
+    }
+    render();
+    document.getElementById('searchBar').focus(); // وضع الكسول: التركيز التلقائي على البحث
+</script>
+</body>
+</html>
