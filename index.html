@@ -220,11 +220,11 @@
         let text = `*فاتورة شركة توصيلة*\n`;
         text += `--------------------------\n`;
         text += `الدراج: ${r.name}\n`;
+        text += `صافي ربحك: ${(r.totalRiderProfit || 0).toFixed(2)+r.totalDebt.toFixed(2)}\n`;
         text += `المجموع المطلوب: ${r.totalDebt.toFixed(2)}\n`;
-        text += `صافي ربحك: ${(r.totalRiderProfit || 0).toFixed(2)}\n`;
         text += `عدد الرحلات: ${r.courses.length}\n`;
         text += `--------------------------\n`;
-        text += `يرجى الدفع عبر الباركود المرفق في المكتب.`;
+        text += `يرجى الدفع عبر بنكيلي⬅️26891144.`;
         const url = `https://wa.me/${r.phone}?text=${encodeURIComponent(text)}`;
         window.open(url, '_blank');
     }
