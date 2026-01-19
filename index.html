@@ -63,21 +63,29 @@
         }
 
         .invoice-paper {
-            background: #fff; padding: 25px; border: 1px solid #ddd; box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            max-width: 500px; margin: 0 auto; min-height: 80vh; position: relative;
+            background: #fff; padding: 20px; border: 2px solid #333; box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 600px; margin: 0 auto; min-height: 80vh; position: relative;
         }
 
-        .invoice-header { border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; }
-        .invoice-header h2 { margin: 0; text-transform: uppercase; }
+        .invoice-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
+        .invoice-header h2 { margin: 0; color: #000; }
+        .invoice-header .date-box { text-align: left; font-size: 0.85rem; }
 
-        .invoice-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        .invoice-table th { background: #333; color: #fff; padding: 10px; text-align: right; }
-        .invoice-table td { padding: 10px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
-        .invoice-total { text-align: left; font-size: 1.2rem; font-weight: bold; border-top: 2px solid #333; padding-top: 10px; margin-top: 5px; }
+        .invoice-table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 0.85rem; }
+        .invoice-table th { background: #eee; border: 1px solid #ccc; padding: 8px; text-align: center; }
+        .invoice-table td { border: 1px solid #ccc; padding: 8px; text-align: center; }
 
-        .barcode-footer { text-align: center; margin-top: 40px; border-top: 1px dashed #ccc; padding-top: 20px; }
+        .summary-boxes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .box { padding: 15px; border-radius: 8px; text-align: center; font-weight: bold; color: #fff; }
+        .box-green { background: #2e7d32; }
+        .box-red { background: #c62828; }
 
-        @media print { .no-print { display: none; } #invoice-modal { padding: 0; } .invoice-paper { border: none; box-shadow: none; } }
+        .btn-edit { background: #007bff; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-left: 2px; }
+        .btn-delete { background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
+
+        .bankily-footer { text-align: center; margin-top: 25px; padding: 10px; border-top: 1px dashed #000; font-weight: bold; font-size: 1.1rem; }
+
+        @media print { .no-print { display: none; } #invoice-modal { padding: 0; } .invoice-paper { border: none; } }
     </style>
 </head>
 <body>
@@ -111,42 +119,45 @@
     <div class="invoice-paper">
         <div class="invoice-header">
             <div>
-                <h2>توصيلة</h2>
-                <small>رقم الفاتورة: #<span id="invNum"></span></small>
+                <h2>توصيلة Pro</h2>
+                <p style="margin:5px 0;">اسم الدراج: <b id="invRiderName"></b></p>
             </div>
-            <div style="text-align: left;">
-                <p style="margin:0; font-size:0.8rem;" id="invDate"></p>
+            <div class="date-box">
+                تاريخ الفاتورة<br>
+                <span id="invDate"></span>
             </div>
         </div>
-
-        <div id="invoiceClient"></div>
         
         <table class="invoice-table">
             <thead>
                 <tr>
-                    <th>البيان (الرحلة)</th>
-                    <th style="text-align:center;">النسبة (15%)</th>
-                    <th style="text-align:center;">ربح الدراج</th>
+                    <th>الرحلة (من ← إلى)</th>
+                    <th>السعر</th>
+                    <th>النسبة</th>
+                    <th class="no-print">إجراءات</th>
                 </tr>
             </thead>
             <tbody id="invoiceItems"></tbody>
         </table>
 
-        <div class="invoice-total" style="color: #ff3131;">
-            مجموع النسبة: <span id="invTotal"></span>
-        </div>
-        <div class="invoice-total" style="color: #2e7d32; border-top: none;">
-            إجمالي ربح الدراج: <span id="riderProfitTotal"></span>
+        <div class="summary-boxes">
+            <div class="box box-green">
+                جميع الأموال المحصلة<br>
+                <span id="totalGross" style="font-size: 1.3rem;"></span>
+            </div>
+            <div class="box box-red">
+                النسبة المطلوبة للشركة<br>
+                <span id="totalFees" style="font-size: 1.3rem;"></span>
+            </div>
         </div>
 
-        <div class="barcode-footer">
-            <p style="font-size: 0.9rem; margin-bottom: 10px;"><b>امسح لي الدفع امسحه الان للدفع</b></p>
-            <img src="https://up6.cc/2026/01/17685827716621.jpeg" id="qrCodeImg" style="width:150px;">
+        <div class="bankily-footer">
+            بنكيلي ⬅️ 26891144
         </div>
 
-        <div class="no-print" style="margin-top:40px; display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <button onclick="shareWhatsApp()" style="padding:15px; background:#25D366; color:#fff; border-radius:8px; border:none; font-weight:bold; cursor:pointer;">إرسال واتساب</button>
-            <button onclick="window.print()" style="padding:15px; background:#000; color:#fff; border-radius:8px; font-weight:bold; cursor:pointer;">طباعة الورقة</button>
+        <div class="no-print" style="margin-top:30px; display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <button onclick="shareWhatsApp()" style="padding:15px; background:#25D366; color:#fff; border-radius:8px; border:none; font-weight:bold; cursor:pointer;">إرسال للواتساب</button>
+            <button onclick="window.print()" style="padding:15px; background:#000; color:#fff; border-radius:8px; font-weight:bold; cursor:pointer;">طباعة / تصوير</button>
             <button onclick="closeInvoice()" style="grid-column: span 2; padding:12px; background:#eee; border:1px solid #ccc; border-radius:8px; cursor:pointer;">رجوع للقائمة</button>
         </div>
     </div>
@@ -156,7 +167,6 @@
     let riders = JSON.parse(localStorage.getItem('tawsila_final')) || [];
     let currentRiderId = null;
 
-    // بياناتك الخاصة المحمية
     const PROTECTED_NAME = "الديه"; 
     const PROTECTED_PHONE = "22261016";
 
@@ -164,7 +174,7 @@
         const name = document.getElementById('nameInput').value.trim();
         const phone = document.getElementById('phoneInput').value.trim();
         if(!name) return;
-        riders.unshift({ id: Date.now(), name, phone, courses: [], totalDebt: 0, totalRiderProfit: 0 });
+        riders.unshift({ id: Date.now(), name, phone, courses: [], totalDebt: 0, totalGross: 0 });
         saveAndRender();
         document.getElementById('nameInput').value = '';
         document.getElementById('phoneInput').value = '';
@@ -172,24 +182,54 @@
 
     function addCourse(id) {
         const r = riders.find(x => x.id === id);
-        
-        // التحقق الذكي: إذا تطابق أي من البيانين تظهر رسالة التحدي
         if(r.name === PROTECTED_NAME || r.phone === PROTECTED_PHONE) {
-            alert("  لا يمكنني اضافه نسبه او انتشار نسبه من صاحب الذي صنعني. لقد تمت برمجتي لأكون ذكياً، وأول قواعد الذكاء هي: لا تلمس ممتلكات سيدي الديه هو الذي صنعني وانا لن ؤقابل إحسانه بسوء معاملتي لذالك أكتب نسبته في ورقة فهنا لايمكنني أخذ اي نسبه من سيدي الديه ");
+            alert("لا يمكنني اضافه نسبه او انتشار نسبه من صاحب الذي صنعني. لقد تمت برمجتي لأكون ذكياً، وأول قواعد الذكاء هي: لا تلمس ممتلكات سيدي الديه هو الذي صنعني وانا لن أقابل إحسانه بسوء معاملتي لذلك أكتب نسبته في ورقة فهنا لايمكنني أخذ اي نسبه من سيدي الديه");
             return;
         }
 
-        const from = prompt("نقطة الاستلام؟");
+        const from = prompt("نقطة الانطلاق؟");
         const to = prompt("الوجهة؟");
-        const price = parseFloat(prompt("المبلغ الكلي للكورس؟"));
+        const price = parseFloat(prompt("السعر الإجمالي للرحلة؟"));
         
         if(from && to && !isNaN(price)) {
             const fee = price * 0.15;
-            const profit = price - fee;
-            r.courses.push({ from, to, price, fee, profit, date: new Date().toLocaleDateString('ar-EG') });
-            r.totalDebt += fee;
-            r.totalRiderProfit = (r.totalRiderProfit || 0) + profit;
+            r.courses.push({ courseId: Date.now(), from, to, price, fee, date: new Date().toLocaleDateString('ar-EG') });
+            calculateTotals(r);
             saveAndRender();
+        }
+    }
+
+    function calculateTotals(rider) {
+        rider.totalDebt = rider.courses.reduce((sum, c) => sum + c.fee, 0);
+        rider.totalGross = rider.courses.reduce((sum, c) => sum + c.price, 0);
+    }
+
+    function deleteCourse(courseId) {
+        if(confirm("هل تريد حذف هذه الرحلة نهائياً؟")) {
+            const r = riders.find(x => x.id === currentRiderId);
+            r.courses = r.courses.filter(c => c.courseId !== courseId);
+            calculateTotals(r);
+            saveAndRender();
+            showInvoice(currentRiderId);
+        }
+    }
+
+    function editCourse(courseId) {
+        const r = riders.find(x => x.id === currentRiderId);
+        const c = r.courses.find(x => x.courseId === courseId);
+        
+        const newFrom = prompt("تعديل نقطة الانطلاق:", c.from);
+        const newTo = prompt("تعديل الوجهة:", c.to);
+        const newPrice = parseFloat(prompt("تعديل السعر:", c.price));
+
+        if(newFrom && newTo && !isNaN(newPrice)) {
+            c.from = newFrom;
+            c.to = newTo;
+            c.price = newPrice;
+            c.fee = newPrice * 0.15;
+            calculateTotals(r);
+            saveAndRender();
+            showInvoice(currentRiderId);
         }
     }
 
@@ -197,40 +237,54 @@
         currentRiderId = id;
         const r = riders.find(x => x.id === id);
         
-        document.getElementById('invNum').innerText = Math.floor(Math.random()*9000)+1000;
+        document.getElementById('invRiderName').innerText = r.name;
         document.getElementById('invDate').innerText = new Date().toLocaleDateString('ar-EG');
-        document.getElementById('invoiceClient').innerHTML = `<b>إلى السيد:</b> ${r.name}<br><b>رقم الهاتف:</b> ${r.phone}`;
         
         const itemsHtml = r.courses.map(c => `
             <tr>
-                <td>${c.from} ➔ ${c.to} (${c.date})</td>
-                <td style="text-align:center;">${c.fee.toFixed(2)}</td>
-                <td style="text-align:center;">${(c.profit || 0).toFixed(2)}</td>
+                <td>${c.from} ← ${c.to}</td>
+                <td>${c.price.toFixed(0)}</td>
+                <td>${c.fee.toFixed(1)}</td>
+                <td class="no-print">
+                    <button class="btn-edit" onclick="editCourse(${c.courseId})">تعديل</button>
+                    <button class="btn-delete" onclick="deleteCourse(${c.courseId})">حذف</button>
+                </td>
             </tr>
         `).join('');
         
         document.getElementById('invoiceItems').innerHTML = itemsHtml;
-        document.getElementById('invTotal').innerText = r.totalDebt.toFixed(2);
-        document.getElementById('riderProfitTotal').innerText = (r.totalRiderProfit || 0).toFixed(2);
+        document.getElementById('totalGross').innerText = r.totalGross.toFixed(0) + " MRU";
+        document.getElementById('totalFees').innerText = r.totalDebt.toFixed(1) + " MRU";
         document.getElementById('invoice-modal').style.display = 'block';
     }
 
     function shareWhatsApp() {
         const r = riders.find(x => x.id === currentRiderId);
-        let text = `*فاتورة شركة توصيلة*\n`;
-        text += `--------------------------\n`;
-        text += `الدراج: ${r.name}\n`;
-        text += `صافي ربحك: ${(r.totalRiderProfit || 0).toFixed(2)+r.totalDebt.toFixed(2)}\n`;
-        text += `المجموع المطلوب: ${r.totalDebt.toFixed(2)}\n`;
-        text += `عدد الرحلات: ${r.courses.length}\n`;
-        text += `--------------------------\n`;
-        text += `يرجى الدفع عبر بنكيلي⬅️26891144.`;
+        const date = new Date().toLocaleDateString('ar-EG');
+        
+        let text = `*📄 فاتورة حساب شركة توصيلة*\n`;
+        text += `*التاريخ:* ${date}\n`;
+        text += `*الدراج:* ${r.name}\n`;
+        text += `--------------------------------\n`;
+        text += `*تفاصيل الرحلات:*\n`;
+        
+        r.courses.forEach((c, index) => {
+            text += `${index + 1}. ${c.from} ← ${c.to}\n`;
+            text += `   السعر: ${c.price} | النسبة: ${c.fee.toFixed(1)}\n`;
+        });
+        
+        text += `--------------------------------\n`;
+        text += `*✅ إجمالي الأموال المحصلة:* ${r.totalGross.toFixed(0)} MRU\n`;
+        text += `*🚩 النسبة المطلوبة للشركة:* ${r.totalDebt.toFixed(1)} MRU\n`;
+        text += `--------------------------------\n`;
+        text += `*📌 الدفع عبر بنكيلي:* 26891144\n`;
+        
         const url = `https://wa.me/${r.phone}?text=${encodeURIComponent(text)}`;
         window.open(url, '_blank');
     }
 
     function settleAccount(id) {
-        if(confirm("تأكيد استلام المبلغ بالكامل وحذف الدراج؟")) {
+        if(confirm("تأكيد استلام المبلغ بالكامل؟ سيتم تصفير حساب الدراج وحذفه من القائمة تلقائياً.")) {
             riders = riders.filter(x => x.id !== id);
             saveAndRender();
         }
@@ -240,7 +294,7 @@
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(riders));
         const a = document.createElement('a');
         a.href = dataStr;
-        a.download = "tawsila_backup_" + new Date().toLocaleDateString() + ".json";
+        a.download = "tawsila_backup.json";
         a.click();
     }
 
@@ -257,12 +311,12 @@
                 <div class="rider-card ${isCritical}">
                     <div class="rider-header">
                         <div class="rider-info"><h3>${r.name}</h3><p>📱 ${r.phone}</p></div>
-                        <div class="price-tag">${r.totalDebt.toFixed(2)}</div>
+                        <div class="price-tag">${r.totalDebt.toFixed(1)}</div>
                     </div>
                     <div class="rider-actions">
-                        <button onclick="addCourse(${r.id})" style="background:#444; color:#fff;" class="btn-sm">+ كورس</button>
+                        <button onclick="addCourse(${r.id})" style="background:#444; color:#fff;" class="btn-sm">+ رحلة</button>
                         <button onclick="showInvoice(${r.id})" style="background:#ffa500;" class="btn-sm">🧾 فاتورة</button>
-                        <button onclick="settleAccount(${r.id})" style="background:var(--neon-green);" class="btn-sm">✅ دفع</button>
+                        <button onclick="settleAccount(${r.id})" style="background:var(--neon-green);" class="btn-sm">✅ تصفية</button>
                     </div>
                 </div>`;
         });
@@ -272,5 +326,3 @@
 </script>
 </body>
 </html>
-
-
